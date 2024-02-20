@@ -10,8 +10,7 @@ import numpy as np
 #import pyodide_js                   #package for ShinyLive
 #pyodide_js.loadPackage("scipy")
 
-file_path = Path("C:/Users/kamil/OneDrive - Politechnika Śląska/Lukasiewicz/staz/staz/bezrobocie_data.csv") #path to example data in local file
-#file_path = Path(__file__).parent / "bezrobocie_data.csv" #path to example data in ShinyLive
+file_path = Path(__file__).parent / "example_data.csv" #path to example data in ShinyLive
 
 app_ui = ui.page_navbar(
     shinyswatch.theme.united(),
