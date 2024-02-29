@@ -1,1 +1,1 @@
-# shiny_data_analyser
+# shiny-data-explorer
