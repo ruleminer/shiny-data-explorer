@@ -425,13 +425,13 @@ def server(input, output, session):
 
         data_info = pd.DataFrame(
             {
-                "Zmienna": [
-                    "Liczba wierszy",
-                    "Liczba kolumn",
-                    "Liczba kolumn numerycznych",
-                    "Liczba kolumn symbolicznych",
+                "Variable": [
+                    "Number of rows",
+                    "Number of columns",
+                    "Number of numeric columns",
+                    "Number of categorical columns",
                 ],
-                "Wartość": [
+                "Value": [
                     df_dim[0],
                     df_dim[1],
                     data.select_dtypes(include="number").shape[1],
@@ -446,7 +446,7 @@ def server(input, output, session):
     def wartosci_nan_ch():
         data = parsed_file()
         tmp = ((len(data) - data.count()) / len(data)) * 100
-        missing_data = pd.DataFrame({"Zmienna": tmp.index, "Wartość [%]": tmp.values})
+        missing_data = pd.DataFrame({"Variable": tmp.index, "Percentage [%]": tmp.values})
 
         return render.DataGrid(missing_data, width="100%", height="100%")
 
@@ -461,7 +461,7 @@ def server(input, output, session):
             tmp = data[x[i]].describe()
             stat_num.insert(i, x[i], np.around(tmp.values))
         
-        stat_num.insert(0, "Statystyki", tmp.index)
+        stat_num.insert(0, "Statistics", tmp.index)
 
 
         return render.DataGrid(stat_num, width="100%", height="100%")
@@ -481,7 +481,7 @@ def server(input, output, session):
             tmp = data[y[i]].describe()
             stat_atr.insert(i, y[i], tmp.values)
         
-        stat_atr.insert(0, "Statystyki", tmp.index)
+        stat_atr.insert(0, "Statistics", tmp.index)
 
 
         return render.DataGrid(stat_atr, width="100%", height="100%")
@@ -533,14 +533,14 @@ def server(input, output, session):
 
         df_tmp = data[input.category_bar()].value_counts()
         df_count = pd.DataFrame(
-            {"Kategoria": df_tmp.index, "count": df_tmp.values}
+            {"Category": df_tmp.index, "count": df_tmp.values}
         )
 
         fig = px.bar(
             df_count,
-            x="Kategoria",
+            x="Category",
             y="count",
-            title="Ilość wystąpienia danej kategorii",
+            title="Number of occurrences of a category",
             template="plotly_white",
             color_discrete_sequence=["#df6919"],
             height=500
@@ -558,7 +558,7 @@ def server(input, output, session):
 
 
         correlation = data[x].corr(data[y], method=input.method_corr())
-        corr_df = pd.DataFrame({"Korelacja": [correlation], "Metoda": [input.method_corr()]})
+        corr_df = pd.DataFrame({"Correlation": [correlation], "Method": [input.method_corr()]})
         
         return render.DataGrid(corr_df, width="100%", height="100%")
     
@@ -607,7 +607,7 @@ def server(input, output, session):
             return pd.DataFrame()
         
         df = data.groupby(input.category_agg())[input.numeric_agg()].agg(input.statistic())
-        df.insert(0,"Kategoria", df.index)
+        df.insert(0,"Category", df.index)
         return render.DataGrid(df, width="100%", height="100%")
     
     @render.data_frame
@@ -628,7 +628,7 @@ def server(input, output, session):
         indices = [i for i, num in enumerate(data[x]) if num < q1 - cryt * iqr or num > q3 + cryt * iqr]
 
         if len(indices) == 0:
-            df = pd.DataFrame({" ": ["Brak wartości odstających"]})
+            df = pd.DataFrame({" ": ["No outliers"]})
             return render.DataGrid(df, width="100%", height="100%")
         else:
             outliers = data.iloc[indices]
