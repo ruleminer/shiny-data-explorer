@@ -5,30 +5,30 @@ import shinyswatch
 from shinywidgets import output_widget, render_widget
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import numpy as np
-#import pyodide_js                   #package for ShinyLive
-#pyodide_js.loadPackage("scipy")
+
+# import pyodide_js                   #package for ShinyLive
+# pyodide_js.loadPackage("scipy")
 
 file_path = Path(__file__).parent / "example_data.csv" #path to example data in ShinyLive
 
 app_ui = ui.page_navbar(
     shinyswatch.theme.united(),
     
-    ui.nav("Zbiór danych",
+    ui.nav("Data Set",
         ui.row(
             ui.column(6,
-                      ui.input_file("file1", "Wybierz plik:", accept=[".csv"], multiple=False, 
-                                    button_label = "Szukaj...",
-                                    placeholder = "Nie wybrano pliku")),
+                      ui.input_file("file1", "Select file:", accept=[".csv"], multiple=False, 
+                                    button_label = "Browse...",
+                                    placeholder = "No file selected")),
             ui.column(6,
-                      ui.tags.p("Wykorzystaj przykładowe dane"),
-                      ui.input_switch("ready_data", "Przykładowe dane")),
+                      ui.tags.p("Use example data"),
+                      ui.input_switch("ready_data", "Example data")),
         ),
     
         ui.input_select(
             "number_of_rows",
-            "Ilość wyświetlanych wierszy",
+            "Number of displayed rows",
             {
                 "10": "10",
                 "20": "20",
@@ -39,68 +39,70 @@ app_ui = ui.page_navbar(
         ui.output_data_frame("summary_data"),
 
     ),
-    ui.nav("Opis zbioru",
+    ui.nav("Data description",
         ui.navset_tab(
             ui.nav(
-            "Charakterystyka zbioru",
+            "Data characteristics",
                 ui.row(
                     ui.column(6,
-                        "Charakterystyka zbioru",
+                        "Data characteristics",
                         ui.output_data_frame("charakterystyka_zbioru")
                     ),
                     ui.column(6,
-                        "Procent brakujących wartości",
+                        "Percentage of missing values",
                         ui.output_data_frame("wartosci_nan_ch"),
                     ),
                 ),
             ),
             ui.nav(
-                "Podstawowe statystyki",
+                "Primary statistics",
                 ui.navset_pill(
-                    ui.nav("Statystyki atrybutów numerycznych",
-                        ui.input_selectize("numeric_stat", "Wybierz zmienną numeryczną", [], multiple=True),
-                        ui.output_data_frame("num_stats"),
+                    ui.nav("Numerical attribute statistics",
+                            ui.markdown(""),
+                            ui.input_selectize("numeric_stat", "Choose a numeric variable", [], multiple=True),
+                            ui.output_data_frame("num_stats"),
                     ),
-                    ui.nav("Statystyki atrybutów nominalnych",
-                              ui.input_selectize("category_stat", "Wybierz kategorię", [], multiple=True),
-                              ui.output_data_frame("atr_stats")
+                    ui.nav("Nominal attribute statistics",
+                            ui.markdown(""),
+                            ui.input_selectize("category_stat", "Choose a category variable", [], multiple=True),
+                            ui.output_data_frame("atr_stats")
                     ),
                 ),
             ),
         ),
     ),
-    ui.nav("Wizualizacje",
+    ui.nav("Visualizations",
            ui.navset_tab(
-                ui.nav("Atrybuty numeryczne",
+                ui.nav("Numerical attributes",
                        ui.row(
                             ui.tags.h1("Histogram"),
-                            ui.input_select("numeric_hist", "Wybierz zmienną numeryczną", []),
-                            ui.input_slider("bins", "Ilość binów", 2, 30, 15),
+                            ui.input_select("numeric_hist", "Choose a numeric variable", []),
+                            ui.input_slider("bins", "Number of bins", 2, 30, 15),
                             output_widget("histogram"),
                         ),
                        ui.row(
                            
-                            ui.tags.h1("Wykres pudełkowy"),
-                            ui.input_selectize("numeric_box", "Wybierz zmienną", [], multiple=True),
+                            ui.tags.h1("Box plot"),
+                            ui.input_selectize("numeric_box", "Choose a variable", [], multiple=True),
                             output_widget("boxplot"),
                         ),
                 ),
-                ui.nav("Atrybuty nominalne", 
-                    ui.input_select("category_bar", "Wybierz kategorię", []),
+                ui.nav("Nominal attributes", 
+                    ui.input_select("category_bar", "Choose a category variable", []),
                     output_widget("barplot_atr")
                     ),
             ),
     ),
-    ui.nav("Korelacje",
+    ui.nav("Correlations",
               ui.row(
                 ui.column(4,
-                             ui.input_select("numeric_corr", "Wybierz pierwszą zmienną", []),
+                             ui.input_select("numeric_corr", "Choose the first variable", []),
                              ),
                 ui.column(4,
-                             ui.input_select("numeric_corr2", "Wybierz drugą zmienną", []),
+                             ui.input_select("numeric_corr2", "Choose the second variable", []),
                              ),
                 ui.column(4,
-                            ui.input_select("method_corr", "Wybierz metodę", {"pearson":"Pearson",
+                            ui.input_select("method_corr", "Select a method", {"pearson":"Pearson",
                                                                             "spearman":"Spearman",
                                                                             "kendall":"Kenall"}),
                         ),
@@ -108,55 +110,55 @@ app_ui = ui.page_navbar(
                 ui.output_data_frame("corr_df"),
                 ),
     ),
-    ui.nav("Szeregi czasowe",
+    ui.nav("Time series",
            ui.row(
                ui.column(4,
-                    ui.input_select("time", "Wybierz szereg czasowy", []),
+                    ui.input_select("time", "Choose a time series", []),
                ),
                ui.column(4,
-                    ui.input_select("variable", "Wybierz zmienną", []),
+                    ui.input_select("variable", "Choose a numeric variable", []),
                ),
                ui.column(4,
-                    ui.input_select("category_time", "Wybierz kategorie", []),
+                    ui.input_select("category_time", "Choose a category variable", []),
                ),
            ),
             output_widget("time_city"),
     ),
     
-    ui.nav("Agregaty", 
+    ui.nav("Data aggregators", 
         ui.row(  
             ui.column(6,
-                ui.input_select("category_agg", "Wybierz kategorię", []),
-                ui.input_select("numeric_agg", "Wybierz zmienną numeryczną", []),
+                ui.input_select("category_agg", "Choose a category variable", []),
+                ui.input_select("numeric_agg", "Choose a numeric variable", []),
             ),
             ui.column(6, 
-                ui.input_checkbox_group("statistic", "Wybierz metryki",            
+                ui.input_checkbox_group("statistic", "Choose metrics",            
                     {
                         "min": "Min",
                         "max": "Max",
-                        "mean": "Średnia",
-                        "median": "Mediana",
-                        "q1": "Górny kwartyl",
-                        "q3": "Dolny kwartyl",
+                        "mean": "Average",
+                        "median": "Median",
+                        "q1": "Lower quartile",
+                        "q3": "Upper quartile",
                     },
                 ),
             ),
         ),
         ui.output_data_frame("grouped_data"),
     ),
-    ui.nav("Wielkości odstające",
+    ui.nav("Outliers",
            ui.row(
                ui.column(6,
-                         ui.input_select("method", "Wybierz kryterium", ["Q +/- 1.5IQR", "Q +/- 3IQR"])
+                         ui.input_select("method", "Choose a criterion", ["Q +/- 1.5IQR", "Q +/- 3IQR"])
                          ),
                 ui.column(6, 
-                          ui.input_select("numeric_outliers", "Wybierz zmienną", [])
+                          ui.input_select("numeric_outliers", "Choose a variable", [])
                           ),
                 ),
             ui.output_data_frame("outliers_df"),
            ),
 
-    title = "Analiza Danych",
+    title = "Data Explorer",
     bg = "#09171c",
 )
 
